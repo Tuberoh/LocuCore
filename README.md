@@ -68,7 +68,7 @@ It opens a useful GUI to simplify the previous commands
 ![LocuCore GUI](https://cdn.modrinth.com/data/cached_images/8e8b695f3667576fd6285d5c17d95faa0081b7d3_0.webp)
 
 
-# Permission
+# Permissions
 
 - locucore.set
 - locucore.remove
