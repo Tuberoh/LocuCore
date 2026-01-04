@@ -1,0 +1,31 @@
+name: LocuCore
+version: '1.0-SNAPSHOT'
+main: io.github.tuberoh.locuCore.LocuCore
+description: LocuCore is a management plugin to improve the teleport system
+author: Tuberoh
+api-version: '1.21'
+permissions:
+  locucore.set:
+    description: Permission to set the location
+    default: not op
+  locucore.remove:
+    description: Permission to remove the location
+    default: op
+  locucore.tp:
+    description: Permission to tp to the location
+    default: not op
+  locucore.edit:
+    description: Permission to modify the location
+    default: op
+  locucore.rank:
+    description: Permission to manage rank
+    children:
+      locucore.rank.admin:
+        description: permission which give total power control
+        default: op
+
+commands:
+  luc:
+    description:  main command
+    usage: "/luc"
+    aliases: [luc, locu]
