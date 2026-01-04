@@ -19,7 +19,7 @@ LocuCore is a management plugin designed for saving, managing, and teleporting t
 ```
 Shows the list of commands
 
-- Set Command
+- Set Commands
 ```
  /luc set <name> 
 ```
@@ -43,18 +43,18 @@ Remove a specific location
 ```
 Teleport a specific player to a location
 
-- Modify Command
+- Edit Commands
 ```
-/luc modify <location_name> coordinates 
+/luc edit <location_name> coordinates 
 ```
 Useful if you want to change the coordinates with your exact position in that moment
 
 ```
-/luc modify <location_name> coordinates <x> <y> <z>
+/luc edit <location_name> coordinates <x> <y> <z>
 ```
 Universal command to modify the coordinates of a specific location
 ```
-/luc modify <location_name> owner <player_name>
+/luc edit <location_name> owner <player_name>
 ```
 Useful if you want to pass the property of the location to another player
 
