@@ -11,10 +11,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.File;
 import java.io.IOException;
 import org.bukkit.entity.Player;
-import java.util.Collections;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.UUID;
+
+import java.util.*;
 
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.ConfigurationSection;
@@ -37,7 +35,7 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
 
         if (args.length == 0) {
 
-            sender.sendMessage("§8[§6LocuCore§8] §cSorry, the command is incorrect");
+            sender.sendMessage("§8[§6LocuCore§8] §cSorry, the command is incorrect. Type /luc help");
             return true;
 
         } else if (args[0].equalsIgnoreCase("set")) {
@@ -79,12 +77,14 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
                 String uuid_string = playeruuid.toString();
                 String datastring = LocalDate.now().toString();
                 String world = p.getWorld().getName();
+                float pitch = p.getLocation().getPitch();
+                float yaw = p.getLocation().getYaw();
 
                 if (args.length == 2) {
 
-                    x = p.getLocation().getX();
-                    y = p.getLocation().getY();
-                    z = p.getLocation().getZ();
+                    x = (double) Math.round(p.getLocation().getX()*1000.0)/1000;
+                    y = (double) Math.round(p.getLocation().getY()*1000.0)/1000;
+                    z = (double) Math.round(p.getLocation().getZ()*1000.0)/1000;
 
                 } else {
 
@@ -98,6 +98,7 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
                     return true;
                 }
 
+
                 locuCoreconfig.set("Location." + name + ".Coordinate.x", x);
                 locuCoreconfig.set("Location." + name + ".Coordinate.y", y);
                 locuCoreconfig.set("Location." + name + ".Coordinate.z", z);
@@ -105,6 +106,9 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
                 locuCoreconfig.set("Location." + name + ".Created_on", datastring);
                 locuCoreconfig.set("Location." + name + ".Created_by", username);
                 locuCoreconfig.set("Location." + name + ".UUID_creator", uuid_string);
+                locuCoreconfig.set("Location." + name + ".yaw", yaw);
+                locuCoreconfig.set("Location." + name + ".pitch", pitch);
+
 
                 locuCoreconfig.save(locuCorelist);
                 //§8[§6LocuCore§8]
@@ -159,6 +163,7 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
             // luc tp <player_name> <location_name>
 
             ConfigurationSection section = locuCoreconfig.getConfigurationSection("Location");
+
             if (args.length < 3) {
 
                 sender.sendMessage("§8[§6LocuCore§8] §cWrong usage. /luc tp <player> <location>");
@@ -187,12 +192,17 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
             double x = locuCoreconfig.getDouble("Location." + args[2] + ".Coordinate.x");
             double y = locuCoreconfig.getDouble("Location." + args[2] + ".Coordinate.y");
             double z = locuCoreconfig.getDouble("Location." + args[2] + ".Coordinate.z");
-            Location loc = new Location(world, x, y, z);
+            double pitch = locuCoreconfig.getDouble("Location." + args[2] + ".pitch");
+            double yaw = locuCoreconfig.getDouble("Location." + args[2] + ".yaw");
+            Location loc = new Location(world, x, y, z, (float) yaw, (float) pitch);
             try {
 
                 p.teleport(loc);
-                p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
-                p.spawnParticle(Particle.END_ROD, p.getLocation(), 80, 1, 1, 1, 0.1);
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    p.playSound(p.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+                    p.spawnParticle(Particle.END_ROD, p.getLocation(), 80, 1, 1, 1, 0.1);
+                });
+
 
             } catch (NullPointerException e) {
 
@@ -286,9 +296,9 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
 
                 if(args.length == 3){
 
-                    x = p.getLocation().getX();
-                    y = p.getLocation().getY();
-                    z = p.getLocation().getZ();
+                    x = (double) Math.round(p.getLocation().getX()*1000.0)/1000;
+                    y = (double) Math.round(p.getLocation().getY()*1000.0)/1000;
+                    z = (double) Math.round(p.getLocation().getZ()*1000.0)/1000;
 
                 }else{
 
@@ -399,9 +409,9 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
         if (args[0].equalsIgnoreCase("set")) {
 
             Player p = (Player) sender;
-            if (args.length == 3) completions.add(Integer.toString(p.getLocation().getBlockX()));
-            if (args.length == 4) completions.add(Integer.toString(p.getLocation().getBlockY()));
-            if (args.length == 5) completions.add(Integer.toString(p.getLocation().getBlockZ()));
+            if (args.length == 3) completions.add(Double.toString((double) Math.round(p.getLocation().getX()*1000.0)/1000.0));
+            if (args.length == 4) completions.add(Double.toString((double) Math.round(p.getLocation().getY()*1000.0)/1000.0));
+            if (args.length == 5) completions.add(Double.toString((double) Math.round(p.getLocation().getZ()*1000.0)/1000.0));
 
             return completions;
         }
@@ -472,9 +482,9 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
 
             //luc edit <location_name> <coordinates> <x> <y> <z>
             Player p = (Player) sender;
-            if (args.length == 4) completions.add(Integer.toString(p.getLocation().getBlockX()));
-            if (args.length == 5) completions.add(Integer.toString(p.getLocation().getBlockY()));
-            if (args.length == 6) completions.add(Integer.toString(p.getLocation().getBlockZ()));
+            if (args.length == 4) completions.add(Double.toString((double) Math.round(p.getLocation().getX()*1000.0)/1000.0));
+            if (args.length == 5) completions.add(Double.toString((double) Math.round(p.getLocation().getY()*1000.0)/1000.0));
+            if (args.length == 6) completions.add(Double.toString((double) Math.round(p.getLocation().getZ()*1000.0)/1000.0));
 
             return completions;
         }
