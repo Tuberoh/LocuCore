@@ -58,6 +58,16 @@ Universal command to modify the coordinates of a specific location
 ```
 Useful if you want to pass the property of the location to another player
 
+```
+/luc edit <waypoint> public <true/false>
+```
+Command to change the visibility of your waypoint
+
+```
+/luc edit <waypoint> name <new_name>
+```
+Command to change the name of your waypoint
+
 - Menu Command
 
 ```
