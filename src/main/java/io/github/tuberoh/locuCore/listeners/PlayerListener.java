@@ -1,5 +1,5 @@
 package io.github.tuberoh.locuCore.listeners;
-import io.github.tuberoh.locuCore.Configs.UpdateChecker;
+import io.github.tuberoh.locuCore.Utilities.UpdateChecker;
 import io.github.tuberoh.locuCore.LocuCore;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -19,7 +19,9 @@ public class PlayerListener implements Listener {
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         if (player.hasPermission("locucore.rank.admin")) {
+
             Bukkit.getScheduler().runTaskLater(plugin, () -> new UpdateChecker(plugin).check(player), 20L);
+
         }
     }
 }

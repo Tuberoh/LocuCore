@@ -2,27 +2,26 @@ package io.github.tuberoh.locuCore.Menus;
 
 import io.github.tuberoh.locuCore.LocuCore;
 import io.github.tuberoh.locuCore.Menu.LocuMenu;
+import io.github.tuberoh.locuCore.Objects.Waypoints;
+import io.github.tuberoh.locuCore.Utilities.DataController;
 import org.bukkit.Material;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
-import java.io.File;
 
 public class DeleteMenuConf extends LocuMenu {
 
     private final String locationName;
     private final LocuCore plugin;
-    private final File locuCorelist;
-    private final FileConfiguration locuCoreconfig;
+    private final DataController dc;
+    private final Waypoints wp;
 
 
-    public DeleteMenuConf(LocuCore plugin, String locationName, File locuCorelist){
+    public DeleteMenuConf(LocuCore plugin, String locationName, DataController dc, Waypoints wp) {
 
         super(Rows.THREE, "§c" + "Are you sure?");
         this.plugin = plugin;
         this.locationName = locationName;
-        this.locuCorelist = locuCorelist;
-        locuCoreconfig = YamlConfiguration.loadConfiguration(locuCorelist);
+        this.dc = dc;
+        this.wp = wp;
 
     }
 
@@ -40,22 +39,17 @@ public class DeleteMenuConf extends LocuMenu {
         ItemStack deny = createItem(Material.RED_CONCRETE, "§cDeny");
         setItem(14, deny, player -> {
 
-            new LocationDetailed(plugin, locationName, locuCorelist).open(player);
+            new WaypointDetailed(plugin, locationName, dc, wp).open(player);
 
         });
 
         ItemStack confirm = createItem(Material.GREEN_CONCRETE, "§aConfirm");
         setItem(12, confirm, player -> {
-            try {
-                locuCoreconfig.set("Location." + locationName, null);
-                locuCoreconfig.save(locuCorelist);
-                player.sendMessage("§8[§6LocuCore§8] §aLocation removed: " + locationName);
-                new LocationsMenu(plugin, 0, locuCorelist).open(player);
-            }
-            catch (Exception e) {
-                player.sendMessage("§8[§6LocuCore§8] §cError on removing the location!");
-                plugin.getLogger().severe("Error: " + e.getMessage());
-            }
+
+            dc.deleteWaypoint(wp.getOwner_uuid(), locationName);
+            String status = wp.getStatus() ? "public" : "private";
+            new WpMenu(plugin, 0, dc, status).open(player);
+
         });
 
     }

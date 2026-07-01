@@ -20,6 +20,7 @@ public abstract class LocuMenu implements GuiMenu{
 
     private final Inventory inventory;
     private final Map<Integer, Consumer<Player>> actions = new HashMap<>();
+    protected Player viewer;
 
     public LocuMenu(Rows rows, String title){
 
@@ -27,6 +28,12 @@ public abstract class LocuMenu implements GuiMenu{
 
     }
 
+    @Override
+    public void open(Player player) {
+        this.viewer = player;
+        onSetItems();
+        player.openInventory(getInventory());
+    }
 
     @Override
     public void click(Player player, int slot) {

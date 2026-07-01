@@ -1,5 +1,5 @@
 name: LocuCore
-version: '1.0.0'
+version: '2.0.0'
 main: io.github.tuberoh.locuCore.LocuCore
 description: LocuCore is a management plugin to improve the teleport system
 author: Tuberoh

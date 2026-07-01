@@ -1,14 +1,16 @@
 package io.github.tuberoh.locuCore;
 
 import io.github.tuberoh.locuCore.Commands.LocuCommand;
+import io.github.tuberoh.locuCore.Utilities.DataController;
+import io.github.tuberoh.locuCore.Utilities.MigrationSystem;
 import io.github.tuberoh.locuCore.listeners.MenuListener;
-import io.github.tuberoh.locuCore.listeners.PlayerListener;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 
 
 public final class LocuCore extends JavaPlugin {
 
+    DataController dc = new DataController(this);
     @Override
     public void onLoad(){
 
@@ -21,35 +23,29 @@ public final class LocuCore extends JavaPlugin {
     @Override
     public void onEnable() {
 
-        getLogger().info("[LocuCore] The plugin is enabled. Nothing went wrong");
+        dc.connect();
         final File LocuCorelist = new File(getDataFolder(), "data.yml");
-        if (!LocuCorelist.exists()) {
-            saveResource("data.yml", false);
-        }
 
+        if(LocuCorelist.exists()){
 
-        LocuCommand locuCommand = new LocuCommand(this, LocuCorelist);
-        try{
-
-            getCommand("luc").setExecutor(locuCommand);
-            getCommand("luc").setTabCompleter(locuCommand);
-
-        }
-        catch(NullPointerException e){
-
-            getLogger().warning(e.getMessage());
+            MigrationSystem ms = new MigrationSystem(this, LocuCorelist, dc);
+            ms.startMigration();
 
         }
 
+        LocuCommand locuCommand = new LocuCommand(this, dc);
+        getCommand("luc").setExecutor(locuCommand);
+        getCommand("luc").setTabCompleter(locuCommand);
         getServer().getPluginManager().registerEvents(new MenuListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
+        getLogger().info("LocuCore is enabled. Nothing went wrong");
 
     }
 
     @Override
     public void onDisable() {
 
-        getLogger().info("[LocuCore] The plugin is disabled");
+        dc.disconnect();
+        getLogger().info("LocuCore is disabled");
 
     }
 }
