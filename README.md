@@ -9,6 +9,7 @@ LocuCore is a management plugin designed for saving, managing, and teleporting t
 <a href="https://www.reddit.com/user/Tuberoh/"><img src="https://cdn.modrinth.com/data/cached_images/1b0ee6f284921f9246832c49c49f30404ab091eb.png" height="110" width="110" alt="reddit_logo"></a>
 <a href="https://github.com/Tuberoh"><img src="https://cdn.modrinth.com/data/cached_images/179ce3e5a3e920f7216496fde1e3cb57c315fca7.png" height="110" width="110" alt="githulogo"></a>
 <a href="https://modrinth.com/user/Tuberoh"><img src="https://cdn.modrinth.com/data/cached_images/f9e331148f741e977c0aca1f36ff48abdf58ca70.png" height="110" width="110" alt="githulogo"></a>
+<a href="https://ko-fi.com/tuberoh"><img src="https://cdn.modrinth.com/data/cached_images/c598e3594eaf1a15976b5d4c12709d4bba08d212.png" height="110" width="110" alt="kofi_logo"></a>
 </div>
 
 # Commands
