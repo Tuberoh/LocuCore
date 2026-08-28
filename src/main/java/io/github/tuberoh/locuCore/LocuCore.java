@@ -4,6 +4,7 @@ import io.github.tuberoh.locuCore.Commands.LocuCommand;
 import io.github.tuberoh.locuCore.Utilities.DataController;
 import io.github.tuberoh.locuCore.Utilities.MigrationSystem;
 import io.github.tuberoh.locuCore.listeners.MenuListener;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 
@@ -23,7 +24,13 @@ public final class LocuCore extends JavaPlugin {
     @Override
     public void onEnable() {
 
-        dc.connect();
+        if(!dc.connect()){
+
+            getLogger().severe("Database initialization failed. Disabling LocuCore.");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+
+        }
         final File LocuCorelist = new File(getDataFolder(), "data.yml");
 
         if(LocuCorelist.exists()){

@@ -49,6 +49,7 @@ public class DeleteMenuConf extends LocuMenu {
             dc.deleteWaypoint(wp.getOwner_uuid(), locationName);
             String status = wp.getStatus() ? "public" : "private";
             new WpMenu(plugin, 0, dc, status).open(player);
+            player.sendMessage("§8[§6LocuCore§8] §c" + wp.getName() + "has been deleted successfully");
 
         });
 

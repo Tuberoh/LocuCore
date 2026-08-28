@@ -19,25 +19,37 @@ public class DataController {
         this.plugin = plugin;
     }
 
-    public void connect() {
+    public boolean connect(){
         File dataFolder = plugin.getDataFolder();
 
-        try {
+        try{
+
             Files.createDirectories(dataFolder.toPath());
-        } catch (Exception e) {
+
+        }catch (Exception e){
+
             plugin.getLogger().severe("Impossibile to create the file: " + e.getMessage());
-            return;
+            return false;
+
         }
 
         File dbFile = new File(dataFolder, "Locuwaypoints.db");
         this.url = "jdbc:sqlite:" + dbFile.getAbsolutePath();
 
-        try {
+        try{
+
             this.connection = DriverManager.getConnection(url);
             initTables();
             enableWAL();
-        } catch (SQLException e) {
+            return true;
+
+        }
+        catch (SQLException e){
+
             plugin.getLogger().severe("Connection error: " + e.getMessage());
+            this.connection = null;
+            return false;
+
         }
     }
 

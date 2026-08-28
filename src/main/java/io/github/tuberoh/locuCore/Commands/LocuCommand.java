@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import java.util.*;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.util.StringUtil;
+import java.util.Locale;
 
 
 public class LocuCommand implements CommandExecutor, TabCompleter {
@@ -42,6 +43,14 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
         } else if (args[0].equalsIgnoreCase("set")) {
 
             //luc set <waypoint> <x> <y> <z>
+
+            if(!sender.hasPermission("locucore.set")){
+
+                sender.sendMessage("§8[§6LocuCore§8] §cSorry, you don't have the right permission!");
+                return true;
+
+            }
+
             if (args.length < 2) {
 
                 sender.sendMessage("§8[§6LocuCore§8] §cIncorrect usage. /luc set <location> <x> <y> <z>");
@@ -98,9 +107,17 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
 
                 }
 
-                dc.setWaypoint(name, x, y, z, username, yaw, pitch, world, uuid_string, false);
+                if(dc.setWaypoint(name, x, y, z, username, yaw, pitch, world, uuid_string, false)){
 
-                sender.sendMessage("§8[§6LocuCore§8] §a" + name + " was saved successfully ");
+                    sender.sendMessage("§8[§6LocuCore§8] §a" + name + " was saved successfully ");
+
+                }
+                else{
+
+                    sender.sendMessage("§8[§6LocuCore§8] §cAn error occurred while saving the waypoint");
+
+                }
+
 
             } catch (NumberFormatException e){
 
@@ -113,17 +130,31 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
 
             // luc remove name
 
-            if (args.length < 2) {
+            if (args.length < 2){
 
                 sender.sendMessage("§8[§6LocuCore§8] §cIncorrect usage. /luc remove <location>");
                 return true;
 
             }
-            if (dc.empty()) {
+            if (dc.empty()){
                 sender.sendMessage("§8[§6LocuCore§8] §cThere are no saved locations");
                 return true;
             }
             String name = args[1];
+            String owner = dc.getOwner(uuid_string, name);
+
+            if (owner == null){
+
+                sender.sendMessage("§8[§6LocuCore§8] §cThis waypoint doesn't exist");
+                return true;
+
+            }
+            if (!(owner.equals(sender.getName()) || sender.hasPermission("locucore.rank.admin"))){
+
+                sender.sendMessage("§8[§6LocuCore§8] §aYou can't remove the location");
+                return true;
+
+            }
 
             if (!(dc.getOwner(uuid_string, name).equals(sender.getName()) || sender.hasPermission("locucore.rank.admin") || sender.hasPermission("locucore.remove"))) {
 
@@ -151,9 +182,18 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
 
             //- Waypoints di un altro giocatore
             // luc tp <player_name> <location_name>
+
+            if(!sender.hasPermission("locucore.tp")) {
+
+                sender.sendMessage("§8[§6LocuCore§8] §cSorry, you don't have the right permission!");
+                return true;
+
+            }
+
             if(args.length < 2 || args.length > 3){
 
                 sender.sendMessage("§8[§6LocuCore§8] §cWrong usage. Type /luc help");
+                return true;
 
             }
             if (dc.empty()) {
@@ -246,13 +286,13 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
                     return true;
 
                 }
-                if(dc.getWorld(uuid_string, args[2]).equals("null")){
+                if(dc.getWorld(owner_uuid, args[2]).equals("null")){
 
                     sender.sendMessage("§8[§6LocuCore§8] §cThis waypoint doesn't exists");
                     return true;
 
                 }
-                World world = Bukkit.getWorld(dc.getWorld(uuid_string, args[2]));
+                World world = Bukkit.getWorld(dc.getWorld(owner_uuid, args[2]));
                 double x = dc.getX(owner_uuid, args[2]);
                 double y = dc.getY(owner_uuid, args[2]);
                 double z = dc.getZ(owner_uuid, args[2]);
@@ -273,7 +313,7 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
                     plugin.getLogger().severe("Error: " + e);
 
                 }
-                sender.sendMessage("§8[§6LocuCore§8] §a" + args[1] + " was successfully teleported to:§e " + args[2]);
+                sender.sendMessage("§8[§6LocuCore§8] §aTeleported to: §e" + args[2]);
 
             }
 
@@ -315,6 +355,13 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
             //Command usable just for your own waypoints (Permission granted to admin permission holders to add)
             //luc edit <name> coordinates x y z
             //luc edit <name> owner <player_name>
+
+            if(!sender.hasPermission("locucore.edit")){
+
+                sender.sendMessage("§8[§6LocuCore§8] §cSorry, you don't have the right permission!");
+                return true;
+
+            }
 
             Player p = (Player) sender;
 
@@ -358,9 +405,19 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
                 }
                 else{
 
-                    x = Double.parseDouble(args[3]);
-                    y = Double.parseDouble(args[4]);
-                    z = Double.parseDouble(args[5]);
+                    try{
+
+                        x = Double.parseDouble(args[3]);
+                        y = Double.parseDouble(args[4]);
+                        z = Double.parseDouble(args[5]);
+
+                    }
+                    catch(NumberFormatException e){
+
+                        sender.sendMessage("§8[§6LocuCore§8] §cThe coordinates should be numbers");
+                        return true;
+
+                    }
 
                 }
 
@@ -443,9 +500,10 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
             }
             else if(args[2].equalsIgnoreCase("public")){
 
-                //luc edit <location> public <public/private>
+                //luc edit <location> public <true/false>
                 boolean status = dc.getIsPublic(uuid_string, args[1]);
-                String st = status ? "true" : "false";
+                String st1 = status ? "true" : "false";
+                String st = status ? "public" : "private";
 
 
                 if(args.length<4){
@@ -461,9 +519,9 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
                 }
 
 
-                if(st.equalsIgnoreCase(args[3])){
+                if(st1.equalsIgnoreCase(args[3])){
 
-                    sender.sendMessage("§8[§6LocuCore§8] §cThis location is already " + status);
+                    sender.sendMessage("§8[§6LocuCore§8] §cThis location is already " + st);
                     return true;
 
                 }
@@ -473,7 +531,7 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
 
                         if(dc.editVisibility(uuid_string, args[1], true)){
 
-                            sender.sendMessage("§8[§6LocuCore§8] §aThe visibility has been successfully set to public!");
+                            sender.sendMessage("§8[§6LocuCore§8] §a" + args[1] + " is now " + "§2"+ st1);
 
                         }
                         else{
@@ -487,7 +545,7 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
 
                         if(dc.editVisibility(uuid_string, args[1], false)){
 
-                            sender.sendMessage("§8[§6LocuCore§8] §aThe visibility has been successfully set to private!");
+                            sender.sendMessage("§8[§6LocuCore§8] §a" + args[1] + " is now " + "§4"+ st1);
 
                         }
                         else{
@@ -569,12 +627,30 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
 
 
         if (args.length == 1) {
-            completions.add("set");
-            completions.add("remove");
-            completions.add("tp");
+
+            if(sender.hasPermission("locucore.set")){
+
+                completions.add("set");
+
+            }
+            if(sender.hasPermission("locucore.edit")){
+
+                completions.add("edit");
+
+            }
+            if(sender.hasPermission("locucore.remove")){
+
+                completions.add("remove");
+
+            }
+            if(sender.hasPermission("locucore.tp")){
+
+                completions.add("tp");
+
+            }
             completions.add("menu");
             completions.add("help");
-            completions.add("edit");
+
             return completions;
         }
 
@@ -588,17 +664,17 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
 
             if (args.length == 3){
 
-                completions.add(String.format("%.3f", p.getLocation().getX()));
+                completions.add(String.format(Locale.US,"%.3f", p.getLocation().getX()));
 
             }
             if (args.length == 4){
 
-                completions.add(String.format("%.3f", p.getLocation().getY()));
+                completions.add(String.format(Locale.US,"%.3f", p.getLocation().getY()));
 
             }
             if (args.length == 5){
 
-                completions.add(String.format("%.3f", p.getLocation().getZ()));
+                completions.add(String.format(Locale.US,"%.3f", p.getLocation().getZ()));
 
             }
 
@@ -697,21 +773,21 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
 
             if (args.length == 4){
 
-                completions.add(String.format("%.3f", p.getLocation().getX()));
+                completions.add(String.format(Locale.US, "%.3f", p.getLocation().getX()));
 
             }
 
 
             if (args.length == 5){
 
-                completions.add(String.format("%.3f", p.getLocation().getY()));
+                completions.add(String.format(Locale.US,"%.3f", p.getLocation().getY()));
 
             }
 
 
             if (args.length == 6){
 
-                completions.add(String.format("%.3f", p.getLocation().getZ()));
+                completions.add(String.format(Locale.US,"%.3f", p.getLocation().getZ()));
 
             }
 

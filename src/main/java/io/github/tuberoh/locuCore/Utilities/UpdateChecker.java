@@ -52,7 +52,13 @@ public class UpdateChecker {
                     );
                 }
 
-            } catch (Exception ignored) {}
+            }
+            catch (Exception e){
+
+                plugin.getLogger().warning("Update check failed: " + e.getMessage());
+
+            }
+
         });
     }
 }

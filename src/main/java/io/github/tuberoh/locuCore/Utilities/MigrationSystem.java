@@ -34,82 +34,64 @@ public class MigrationSystem {
 
 
     public void startMigration(){
+        int migrated = 0;
+        int failed = 0;
 
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        ConfigurationSection locations = LocuCoreConfig.getConfigurationSection("Location");
+        if (locations == null) {
+            return;
+        }
 
-            int migrated=0;
-            int failed=0;
-            ConfigurationSection locations = LocuCoreConfig.getConfigurationSection("Location");
+        List<Waypoints> waypoints = new ArrayList<>(getWaypointsYaml(locations));
+        if (waypoints.isEmpty()) {
+            return;
+        }
 
-            if(locations == null){
+        for (Waypoints wp : waypoints) {
 
-                return;
+            String name = wp.getName();
+            String dpname = name;
+            String uuid = wp.getOwner_uuid();
+            UUID owner_uuid = UUID.fromString(uuid);
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(owner_uuid);
+            String owner_name = offlinePlayer.getName();
+            int h = 1;
 
+            if (dc.coordinatesDuplication(uuid, wp.getX(), wp.getY(), wp.getZ(), wp.getWorld())) {
+                continue;
+            }
+            while (dc.WpExists(name, uuid)){
+                name = dpname + h;
+                h++;
             }
 
-            List <Waypoints> waypoints = new ArrayList<>(getWaypointsYaml(locations));
-            if(waypoints.isEmpty()){
+            Boolean st = dc.setWaypoint(name, wp.getX(), wp.getY(), wp.getZ(),
+                    owner_name, wp.getYaw(), wp.getPitch(), wp.getWorld(), uuid, wp.getStatus());
 
-                return;
+            if (st){
 
-            }
-
-            for(int i=0;i<waypoints.size();i++){
-
-                String name = waypoints.get(i).getName();
-                String dpname = name;
-                String uuid = waypoints.get(i).getOwner_uuid();
-                UUID owner_uuid = UUID.fromString(uuid);
-                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(owner_uuid);
-                String owner_name = offlinePlayer.getName();
-
-                int h=1;
-
-                if(dc.coordinatesDuplication(uuid, waypoints.get(i).getX(), waypoints.get(i).getY(), waypoints.get(i).getZ(), waypoints.get(i).getWorld())){
-
-                    continue;
-
-                }
-                while(dc.WpExists(name, uuid)){
-
-                    name = dpname + h;
-                    h++;
-
-                }
-
-                Boolean st = dc.setWaypoint(name,
-                            waypoints.get(i).getX(),
-                            waypoints.get(i).getY(),
-                            waypoints.get(i).getZ(),
-                            owner_name,
-                            waypoints.get(i).getYaw(),
-                            waypoints.get(i).getPitch(),
-                            waypoints.get(i).getWorld(),
-                            uuid,
-                            waypoints.get(i).getStatus());
-
-                if(st){
-
-                    migrated++;
-
-                }
-                else{
-
-                    failed++;
-
-                }
+                migrated++;
 
             }
+            else{
 
-            plugin.getLogger().info("Migration completed: " + migrated + ", Migration failed: " + failed);
+                failed++;
 
-            File newFile = new File(plugin.getDataFolder(), "data_lock.yml");
-            LocuCoreList.renameTo(newFile);
+            }
+        }
 
+        plugin.getLogger().info("Migration completed: " + migrated + ", Migration failed: " + failed);
 
-        });
+        if (failed > 0){
+            plugin.getLogger().severe("Migration had " + failed + " failed row(s). Source YAML preserved, not archiving.");
+            return;
+        }
 
-
+        File newFile = new File(plugin.getDataFolder(), "data_lock.yml");
+        boolean renamed = LocuCoreList.renameTo(newFile);
+        if (!renamed){
+            plugin.getLogger().severe("Migration succeeded but renaming the source YAML failed.");
+        }
     }
     private List<Waypoints> getWaypointsYaml(ConfigurationSection locations){
 
