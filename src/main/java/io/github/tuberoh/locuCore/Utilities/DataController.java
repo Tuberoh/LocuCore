@@ -19,14 +19,14 @@ public class DataController {
         this.plugin = plugin;
     }
 
-    public boolean connect(){
+    public boolean connect() {
         File dataFolder = plugin.getDataFolder();
 
-        try{
+        try {
 
             Files.createDirectories(dataFolder.toPath());
 
-        }catch (Exception e){
+        } catch (Exception e) {
 
             plugin.getLogger().severe("Impossibile to create the file: " + e.getMessage());
             return false;
@@ -36,15 +36,14 @@ public class DataController {
         File dbFile = new File(dataFolder, "Locuwaypoints.db");
         this.url = "jdbc:sqlite:" + dbFile.getAbsolutePath();
 
-        try{
+        try {
 
             this.connection = DriverManager.getConnection(url);
             initTables();
             enableWAL();
             return true;
 
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
 
             plugin.getLogger().severe("Connection error: " + e.getMessage());
             this.connection = null;
@@ -83,6 +82,7 @@ public class DataController {
             plugin.getLogger().severe("Error: " + e.getMessage());
         }
     }
+
     private void enableWAL() throws SQLException {
         try (var stmt = connection.createStatement()) {
             stmt.execute("PRAGMA journal_mode=WAL;");
@@ -108,24 +108,23 @@ public class DataController {
         return true;
     }
 
-    public Boolean wpDuplication(String name, String uuid){
+    public Boolean wpDuplication(String name, String uuid) {
 
         String sql = "SELECT COUNT(*) FROM waypoints WHERE uuid = ? AND name = ?";
 
-        try(var pstmt = connection.prepareStatement(sql)){
+        try (var pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setString(1, uuid);
             pstmt.setString(2, name);
 
             ResultSet rs = pstmt.executeQuery();
-            if(rs.next()){
+            if (rs.next()) {
 
-                return rs.getInt(1)>0;
+                return rs.getInt(1) > 0;
 
             }
 
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
 
             plugin.getLogger().severe("Error: " + e.getMessage());
             return false;
@@ -134,11 +133,12 @@ public class DataController {
         return false;
 
     }
-    public Boolean coordinatesDuplication(String uuid, double x, double y, double z, String world){
+
+    public Boolean coordinatesDuplication(String uuid, double x, double y, double z, String world) {
 
         String sql = "SELECT COUNT(*) FROM waypoints WHERE uuid = ? AND x = ? AND y = ? AND z = ? AND world = ?";
 
-        try(var pstmt = connection.prepareStatement(sql)){
+        try (var pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setString(1, uuid);
             pstmt.setDouble(2, x);
@@ -146,14 +146,13 @@ public class DataController {
             pstmt.setDouble(4, z);
             pstmt.setString(5, world);
             ResultSet rs = pstmt.executeQuery();
-            if(rs.next()){
+            if (rs.next()) {
 
-                return rs.getInt(1)>0;
+                return rs.getInt(1) > 0;
 
             }
 
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
 
             plugin.getLogger().severe("Error: " + e.getMessage());
             return false;
@@ -162,12 +161,14 @@ public class DataController {
         return false;
 
     }
-    public boolean WpExists(String name, String uuid){
+
+    public boolean WpExists(String name, String uuid) {
 
         return wpDuplication(name, uuid);
 
     }
-    public Boolean setWaypoint(String name, double x, double y, double z, String owner, double yaw, double pitch, String world, String uuid, boolean isPublic){
+
+    public Boolean setWaypoint(String name, double x, double y, double z, String owner, double yaw, double pitch, String world, String uuid, boolean isPublic) {
 
         if (connection == null) {
             plugin.getLogger().severe("[DB] Connection is NULL!");
@@ -187,7 +188,7 @@ public class DataController {
                 "uuid," +
                 "isPublic) VALUES (?,?,?,?,datetime('now'),?,?,?,?,?,?)";
 
-        try(var pstmt = connection.prepareStatement(sql)){
+        try (var pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setString(1, name);
             pstmt.setDouble(2, x);
@@ -199,29 +200,28 @@ public class DataController {
             pstmt.setString(8, world);
             pstmt.setString(9, uuid);
             pstmt.setBoolean(10, isPublic);
-            return pstmt.executeUpdate()==1;
+            return pstmt.executeUpdate() == 1;
 
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
 
             plugin.getLogger().severe("Error: " + e.getMessage());
             return false;
         }
 
     }
+
     public boolean deleteWaypoint(String uuid, String name) {
 
         String sql = "DELETE from waypoints WHERE uuid = ? AND name = ?";
 
-        try(var pstmt= connection.prepareStatement(sql)){
+        try (var pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setString(1, uuid);
             pstmt.setString(2, name);
 
-            return pstmt.executeUpdate()>0;
+            return pstmt.executeUpdate() > 0;
 
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
 
             plugin.getLogger().severe("Error: " + e.getMessage());
             return false;
@@ -229,7 +229,8 @@ public class DataController {
         }
 
     }
-    public boolean editCoordinates(String uuid, String name, double x, double y, double z, double yaw, double pitch, String world){
+
+    public boolean editCoordinates(String uuid, String name, double x, double y, double z, double yaw, double pitch, String world) {
 
         String sql = "UPDATE waypoints SET x = ? ," +
                 "y = ? ," +
@@ -239,7 +240,7 @@ public class DataController {
                 "pitch = ? " +
                 "WHERE uuid = ? AND name = ?";
 
-        try(var pstmt = connection.prepareStatement(sql)) {
+        try (var pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setDouble(1, x);
             pstmt.setDouble(2, y);
@@ -250,11 +251,10 @@ public class DataController {
             pstmt.setString(7, uuid);
             pstmt.setString(8, name);
 
-            return pstmt.executeUpdate()>0;
+            return pstmt.executeUpdate() > 0;
 
 
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
 
             plugin.getLogger().severe("Error: " + e.getMessage());
             return false;
@@ -263,23 +263,22 @@ public class DataController {
 
     }
 
-    public boolean editOwner(String uuid, String new_uuid, String name, String owner){
+    public boolean editOwner(String uuid, String new_uuid, String name, String owner) {
 
         String sql = "UPDATE waypoints SET uuid = ? , " +
                 "owner = ? " +
                 "WHERE uuid = ? AND name = ?";
 
-        try(var pstmt = connection.prepareStatement(sql)){
+        try (var pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setString(1, new_uuid);
             pstmt.setString(2, owner);
             pstmt.setString(3, uuid);
             pstmt.setString(4, name);
 
-            return pstmt.executeUpdate()>0;
+            return pstmt.executeUpdate() > 0;
 
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
 
             plugin.getLogger().severe("Error: " + e.getMessage());
             return false;
@@ -288,20 +287,19 @@ public class DataController {
 
     }
 
-    public boolean editVisibility(String uuid, String name, boolean vis){
+    public boolean editVisibility(String uuid, String name, boolean vis) {
 
         String sql = "UPDATE waypoints SET isPublic = ? WHERE uuid = ? AND name = ?";
 
-        try(var pstmt = connection.prepareStatement(sql)){
+        try (var pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setBoolean(1, vis);
             pstmt.setString(2, uuid);
             pstmt.setString(3, name);
 
-            return pstmt.executeUpdate()>0;
+            return pstmt.executeUpdate() > 0;
 
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
 
             plugin.getLogger().severe("Error: " + e.getMessage());
             return false;
@@ -309,20 +307,20 @@ public class DataController {
 
 
     }
-    public boolean editName(String uuid, String name, String new_name){
+
+    public boolean editName(String uuid, String name, String new_name) {
 
         String sql = "UPDATE waypoints SET name = ? WHERE uuid = ? AND name = ?";
 
-        try(var pstmt = connection.prepareStatement(sql)){
+        try (var pstmt = connection.prepareStatement(sql)) {
 
-            pstmt.setString(1,new_name);
+            pstmt.setString(1, new_name);
             pstmt.setString(2, uuid);
             pstmt.setString(3, name);
 
             return pstmt.executeUpdate() > 0;
 
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
 
             plugin.getLogger().severe("Error: " + e.getMessage());
             return false;
@@ -331,23 +329,22 @@ public class DataController {
 
     }
 
-    public String getName(String uuid){
+    public String getName(String uuid) {
 
         String sql = "SELECT name FROM waypoints WHERE uuid = ?";
 
-        try(var pstmt = connection.prepareStatement(sql)){
+        try (var pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setString(1, uuid);
 
             var rs = pstmt.executeQuery();
-            if(rs.next()){
+            if (rs.next()) {
 
                 return rs.getString("name");
 
             }
 
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
 
             plugin.getLogger().severe("Error: " + e.getMessage());
 
@@ -356,25 +353,25 @@ public class DataController {
         return null;
 
     }
-    public double getX(String uuid, String name){
+
+    public double getX(String uuid, String name) {
 
         String sql = "SELECT x FROM waypoints WHERE uuid = ? AND name = ?";
 
-        try(var pstmt = connection.prepareStatement(sql)){
+        try (var pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setString(1, uuid);
             pstmt.setString(2, name);
 
             var rs = pstmt.executeQuery();
 
-            if(rs.next()){
+            if (rs.next()) {
 
                 return rs.getDouble("x");
 
             }
 
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
 
             plugin.getLogger().severe("Error: " + e.getMessage());
 
@@ -383,25 +380,25 @@ public class DataController {
 
 
     }
-    public double getY(String uuid, String name){
+
+    public double getY(String uuid, String name) {
 
         String sql = "SELECT y FROM waypoints WHERE uuid = ? AND name = ?";
 
-        try(var pstmt = connection.prepareStatement(sql)){
+        try (var pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setString(1, uuid);
             pstmt.setString(2, name);
 
             var rs = pstmt.executeQuery();
 
-            if(rs.next()){
+            if (rs.next()) {
 
                 return rs.getDouble("y");
 
             }
 
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
 
             plugin.getLogger().severe("Error: " + e.getMessage());
 
@@ -409,25 +406,25 @@ public class DataController {
         return 0;
 
     }
-    public double getZ(String uuid, String name){
+
+    public double getZ(String uuid, String name) {
 
         String sql = "SELECT z FROM waypoints WHERE uuid = ? AND name = ?";
 
-        try(var pstmt = connection.prepareStatement(sql)){
+        try (var pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setString(1, uuid);
             pstmt.setString(2, name);
 
             var rs = pstmt.executeQuery();
 
-            if(rs.next()){
+            if (rs.next()) {
 
                 return rs.getDouble("z");
 
             }
 
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
 
             plugin.getLogger().severe("Error: " + e.getMessage());
 
@@ -435,25 +432,25 @@ public class DataController {
         return 0;
 
     }
-    public String getOwner(String uuid, String name){
+
+    public String getOwner(String uuid, String name) {
 
         String sql = "SELECT owner FROM waypoints WHERE uuid = ? AND name = ?";
 
-        try(var pstmt = connection.prepareStatement(sql)){
+        try (var pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setString(1, uuid);
             pstmt.setString(2, name);
 
             var rs = pstmt.executeQuery();
 
-            if(rs.next()){
+            if (rs.next()) {
 
                 return rs.getString("owner");
 
             }
 
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
 
             plugin.getLogger().severe("Error: " + e.getMessage());
 
@@ -462,25 +459,24 @@ public class DataController {
 
     }
 
-    public double getYaw(String uuid, String name){
+    public double getYaw(String uuid, String name) {
 
         String sql = "SELECT yaw FROM waypoints WHERE uuid = ? AND name = ?";
 
-        try(var pstmt = connection.prepareStatement(sql)){
+        try (var pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setString(1, uuid);
             pstmt.setString(2, name);
 
             var rs = pstmt.executeQuery();
 
-            if(rs.next()){
+            if (rs.next()) {
 
                 return rs.getDouble("yaw");
 
             }
 
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
 
             plugin.getLogger().severe("Error: " + e.getMessage());
 
@@ -489,25 +485,24 @@ public class DataController {
 
     }
 
-    public double getPitch(String uuid, String name){
+    public double getPitch(String uuid, String name) {
 
         String sql = "SELECT pitch FROM waypoints WHERE uuid = ? AND name = ?";
 
-        try(var pstmt = connection.prepareStatement(sql)){
+        try (var pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setString(1, uuid);
             pstmt.setString(2, name);
 
             var rs = pstmt.executeQuery();
 
-            if(rs.next()){
+            if (rs.next()) {
 
                 return rs.getDouble("pitch");
 
             }
 
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
 
             plugin.getLogger().severe("Error: " + e.getMessage());
 
@@ -516,25 +511,24 @@ public class DataController {
 
     }
 
-    public String getWorld(String uuid, String name){
+    public String getWorld(String uuid, String name) {
 
         String sql = "SELECT world FROM waypoints WHERE uuid = ? AND name = ?";
 
-        try(var pstmt = connection.prepareStatement(sql)){
+        try (var pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setString(1, uuid);
             pstmt.setString(2, name);
 
             var rs = pstmt.executeQuery();
 
-            if(rs.next()){
+            if (rs.next()) {
 
                 return rs.getString("world");
 
             }
 
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
 
             plugin.getLogger().severe("Error: " + e.getMessage());
 
@@ -542,25 +536,25 @@ public class DataController {
         return null;
 
     }
-    public String getUUID(String owner, String name){
+
+    public String getUUID(String owner, String name) {
 
         String sql = "SELECT uuid FROM waypoints WHERE owner = ? AND name = ?";
 
-        try(var pstmt = connection.prepareStatement(sql)){
+        try (var pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setString(1, owner);
             pstmt.setString(2, name);
 
             var rs = pstmt.executeQuery();
 
-            if(rs.next()){
+            if (rs.next()) {
 
                 return rs.getString("uuid");
 
             }
 
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
 
             plugin.getLogger().severe("Error: " + e.getMessage());
             return null;
@@ -569,25 +563,25 @@ public class DataController {
 
 
     }
-    public Boolean getIsPublic(String uuid, String name){
+
+    public Boolean getIsPublic(String uuid, String name) {
 
         String sql = "SELECT isPublic FROM waypoints WHERE uuid = ? AND name = ?";
 
-        try(var pstmt = connection.prepareStatement(sql)){
+        try (var pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setString(1, uuid);
             pstmt.setString(2, name);
 
             var rs = pstmt.executeQuery();
 
-            if(rs.next()){
+            if (rs.next()) {
 
                 return rs.getBoolean("isPublic");
 
             }
 
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
 
             plugin.getLogger().severe("Error: " + e.getMessage());
             return null;
@@ -596,6 +590,7 @@ public class DataController {
         return null;
 
     }
+
     public List<String> getWaypointsNames(String uuid) {
 
         List<String> names = new ArrayList<>();
@@ -605,34 +600,35 @@ public class DataController {
 
             pstmt.setString(1, uuid);
 
-            try (var rs = pstmt.executeQuery()){
-                while (rs.next()){
+            try (var rs = pstmt.executeQuery()) {
+                while (rs.next()) {
 
                     names.add(rs.getString("name"));
 
                 }
             }
 
-        } catch (SQLException e){
+        } catch (SQLException e) {
 
             plugin.getLogger().severe("Error: " + e.getMessage());
         }
 
         return names;
     }
+
     public List<String> getPublicWaypointsNames(String uuid) {
         List<String> names = new ArrayList<>();
 
         String sql = "SELECT name FROM waypoints WHERE uuid = ? AND isPublic = ?";
 
-        try(var pstmt = connection.prepareStatement(sql)){
+        try (var pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setString(1, uuid);
             pstmt.setBoolean(2, true);
 
-            try(var rs = pstmt.executeQuery()){
+            try (var rs = pstmt.executeQuery()) {
 
-                while(rs.next()){
+                while (rs.next()) {
 
                     names.add(rs.getString("name"));
 
@@ -640,8 +636,7 @@ public class DataController {
 
             }
 
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
 
             plugin.getLogger().severe("Error: " + e.getMessage());
 
@@ -650,20 +645,21 @@ public class DataController {
 
 
     }
+
     public List<String> getPrivateWaypointsNames(String uuid) {
 
         List<String> names = new ArrayList<>();
 
         String sql = "SELECT name FROM waypoints WHERE uuid = ? AND isPublic = ?";
 
-        try(var pstmt = connection.prepareStatement(sql)){
+        try (var pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setString(1, uuid);
             pstmt.setBoolean(2, false);
 
-            try(var rs = pstmt.executeQuery()){
+            try (var rs = pstmt.executeQuery()) {
 
-                while(rs.next()){
+                while (rs.next()) {
 
                     names.add(rs.getString("name"));
 
@@ -671,8 +667,7 @@ public class DataController {
 
             }
 
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
 
             plugin.getLogger().severe("Error: " + e.getMessage());
 
@@ -681,18 +676,19 @@ public class DataController {
         return names;
 
     }
+
     public List<String> getAllPublicWaypointsNames() {
         List<String> names = new ArrayList<>();
 
         String sql = "SELECT name FROM waypoints WHERE isPublic = ?";
 
-        try(var pstmt = connection.prepareStatement(sql)){
+        try (var pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setBoolean(1, true);
 
-            try(var rs = pstmt.executeQuery()){
+            try (var rs = pstmt.executeQuery()) {
 
-                while(rs.next()){
+                while (rs.next()) {
 
                     names.add(rs.getString("name"));
 
@@ -701,7 +697,7 @@ public class DataController {
             }
 
 
-        }catch (SQLException e){
+        } catch (SQLException e) {
 
             plugin.getLogger().severe("Error: " + e.getMessage());
 
@@ -710,6 +706,7 @@ public class DataController {
 
 
     }
+
     public List<Waypoints> getPrivateWaypoints(String ownerUUID) {
         List<Waypoints> result = new ArrayList<>();
         String sql = "SELECT name, x, y, z, world, yaw, pitch, uuid FROM waypoints WHERE uuid = ? AND isPublic = 0";
@@ -739,13 +736,13 @@ public class DataController {
 
     }
 
-    public List<Waypoints> getAllPublicWaypoints(){
+    public List<Waypoints> getAllPublicWaypoints() {
 
         List<Waypoints> result = new ArrayList<>();
 
         String sql = "SELECT name, x, y, z, world, yaw, pitch, uuid FROM waypoints WHERE isPublic = 1";
 
-        try (var pstmt = connection.prepareStatement(sql)){
+        try (var pstmt = connection.prepareStatement(sql)) {
 
             ResultSet rs = pstmt.executeQuery();
 
@@ -773,13 +770,14 @@ public class DataController {
         return result;
 
     }
-    public List<Waypoints> getPublicWaypoints(String uuid){
+
+    public List<Waypoints> getPublicWaypoints(String uuid) {
 
         List<Waypoints> result = new ArrayList<>();
 
         String sql = "SELECT name, x, y, z, world, yaw, pitch FROM waypoints WHERE isPublic = 1 AND uuid = ?";
 
-        try (var pstmt = connection.prepareStatement(sql)){
+        try (var pstmt = connection.prepareStatement(sql)) {
 
             pstmt.setString(1, uuid);
             ResultSet rs = pstmt.executeQuery();
@@ -809,5 +807,83 @@ public class DataController {
         return result;
 
     }
+    public List<Waypoints> searchWaypoints(String name){
+
+        List<Waypoints> result = new ArrayList<>();
+
+        String sql = "SELECT name, x, y, z, world, yaw, pitch, uuid FROM waypoints WHERE name LIKE '%' || ? || '%' COLLATE NOCASE AND isPublic = 1";
+
+        try(var pstmt = connection.prepareStatement(sql)){
+
+            pstmt.setString(1, name);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+
+                result.add(new Waypoints(
+                        rs.getString("name"),
+                        rs.getDouble("x"),
+                        rs.getDouble("y"),
+                        rs.getDouble("z"),
+                        rs.getString("world"),
+                        rs.getDouble("yaw"),
+                        rs.getDouble("pitch"),
+                        rs.getString("uuid"),
+                        true
+                ));
+
+            }
+
+        }
+        catch(SQLException e){
+
+            plugin.getLogger().severe("Error: " + e.getMessage());
+
+        }
+        return result;
+
+
+    }
+    public List<Waypoints> searchWaypoints(String name, String uuid, boolean status){
+
+        List <Waypoints> result = new ArrayList<>();
+        String sql = "SELECT name, x, y, z, world, yaw, pitch, uuid FROM waypoints WHERE name LIKE '%' || ? || '%' COLLATE NOCASE AND uuid = ? AND isPublic = ?";
+
+        try(var pstmt = connection.prepareStatement(sql)){
+
+            pstmt.setString(1, name);
+            pstmt.setString(2, uuid);
+            pstmt.setBoolean(3, status);
+
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+
+                result.add(new Waypoints(
+                        rs.getString("name"),
+                        rs.getDouble("x"),
+                        rs.getDouble("y"),
+                        rs.getDouble("z"),
+                        rs.getString("world"),
+                        rs.getDouble("yaw"),
+                        rs.getDouble("pitch"),
+                        uuid,
+                        status
+                ));
+
+            }
+
+        }
+        catch(SQLException e){
+
+            plugin.getLogger().severe("Error: " + e.getMessage());
+
+        }
+        return result;
+
+    }
+
+
+
 
 }

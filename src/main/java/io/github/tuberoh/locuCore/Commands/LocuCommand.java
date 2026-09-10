@@ -2,6 +2,10 @@ package io.github.tuberoh.locuCore.Commands;
 import io.github.tuberoh.locuCore.LocuCore;
 import io.github.tuberoh.locuCore.Menus.MMenu;
 import io.github.tuberoh.locuCore.Utilities.DataController;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -53,12 +57,12 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
 
             if (args.length < 2) {
 
-                sender.sendMessage("§8[§6LocuCore§8] §cIncorrect usage. /luc set <location> <x> <y> <z>");
+                sender.sendMessage("§8[§6LocuCore§8] §cIncorrect usage. /luc set <waypoint> <x> <y> <z>");
                 return true;
 
             }
             if (dc.wpDuplication(args[1], uuid_string)) {
-                sender.sendMessage("§8[§6LocuCore§8] §cThis location already exists");
+                sender.sendMessage("§8[§6LocuCore§8] §cThere is already a waypoint with the same name");
                 return true;
             }
 
@@ -132,12 +136,12 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
 
             if (args.length < 2){
 
-                sender.sendMessage("§8[§6LocuCore§8] §cIncorrect usage. /luc remove <location>");
+                sender.sendMessage("§8[§6LocuCore§8] §cIncorrect usage. /luc remove <waypoint>");
                 return true;
 
             }
             if (dc.empty()){
-                sender.sendMessage("§8[§6LocuCore§8] §cThere are no saved locations");
+                sender.sendMessage("§8[§6LocuCore§8] §cThere are no saved waypoints");
                 return true;
             }
             String name = args[1];
@@ -151,14 +155,14 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
             }
             if (!(owner.equals(sender.getName()) || sender.hasPermission("locucore.rank.admin"))){
 
-                sender.sendMessage("§8[§6LocuCore§8] §aYou can't remove the location");
+                sender.sendMessage("§8[§6LocuCore§8] §aYou can't remove the waypoint");
                 return true;
 
             }
 
             if (!(dc.getOwner(uuid_string, name).equals(sender.getName()) || sender.hasPermission("locucore.rank.admin") || sender.hasPermission("locucore.remove"))) {
 
-                sender.sendMessage("§8[§6LocuCore§8] §aYou can't remove the location");
+                sender.sendMessage("§8[§6LocuCore§8] §aYou can't remove the waypoint");
                 return true;
 
             }
@@ -169,7 +173,7 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
             }
             else{
 
-                sender.sendMessage("§8[§6LocuCore§8] §cImpossible to delete the location");
+                sender.sendMessage("§8[§6LocuCore§8] §cImpossible to delete the waypoint");
 
             }
 
@@ -197,7 +201,7 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
 
             }
             if (dc.empty()) {
-                sender.sendMessage("§8[§6LocuCore§8] §cThere are no saved locations");
+                sender.sendMessage("§8[§6LocuCore§8] §cThere are no saved waypoints");
                 return true;
             }
             if(args.length == 2){
@@ -346,6 +350,7 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage("§6- /luc edit <waypoint> public <true/false>");
             sender.sendMessage("§6- /luc edit <waypoint> name <new_name>");
             sender.sendMessage("§6- /luc menu");
+            sender.sendMessage("§6- /luc info");
             sender.sendMessage(" ");
             sender.sendMessage("§8|--------------------------------------|");
 
@@ -367,19 +372,19 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
 
             if(args.length<2){
 
-                sender.sendMessage("§8[§6LocuCore§8] §cIncorrect usage. /luc edit <location> <coordinates/owner> <xyz/player>");
+                sender.sendMessage("§8[§6LocuCore§8] §cIncorrect usage. /luc edit <waypoint> <coordinates/owner> <xyz/player>");
                 return true;
 
             }
             if (!dc.wpDuplication(args[1], uuid_string)) {
 
-                sender.sendMessage("§8[§6LocuCore§8] §cThis location doesn't exists");
+                sender.sendMessage("§8[§6LocuCore§8] §cThis waypoint doesn't exists");
                 return true;
 
             }
             if(args.length<3){
 
-                sender.sendMessage("§8[§6LocuCore§8] §cIncorrect usage. /luc edit <location> <coordinates/owner/visibility> <xyz/player/true/false>");
+                sender.sendMessage("§8[§6LocuCore§8] §cIncorrect usage. /luc edit <waypoint> <coordinates/owner/visibility> <xyz/player/true/false>");
                 return true;
 
             }
@@ -448,7 +453,7 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
 
                 if(args.length<4){
 
-                    sender.sendMessage("§8[§6LocuCore§8] §cIncorrect usage. /luc edit <location> owner <player>");
+                    sender.sendMessage("§8[§6LocuCore§8] §cIncorrect usage. /luc edit <waypoint> owner <player>");
                     return true;
 
                 }
@@ -508,13 +513,14 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
 
                 if(args.length<4){
 
-                    sender.sendMessage("§8[§6LocuCore§8] §cIncorrect usage. /luc edit <location> public <true/false>");
+                    sender.sendMessage("§8[§6LocuCore§8] §cIncorrect usage. /luc edit <waypoint> public <true/false>");
                     return true;
 
                 }
                 if(!(args[3].equalsIgnoreCase("true") || args[3].equalsIgnoreCase("false"))){
 
-                    sender.sendMessage("§8[§6LocuCore§8] §cIncorrect usage. /luc edit <location> public <true/false>");
+                    sender.sendMessage("§8[§6LocuCore§8] §cIncorrect usage. /luc edit <waypoint> public <true/false>");
+                    return true;
 
                 }
 
@@ -531,7 +537,9 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
 
                         if(dc.editVisibility(uuid_string, args[1], true)){
 
-                            sender.sendMessage("§8[§6LocuCore§8] §a" + args[1] + " is now " + "§2"+ st1);
+                            status = dc.getIsPublic(uuid_string, args[1]);
+                            st = status ? "public" : "private";
+                            sender.sendMessage("§8[§6LocuCore§8] §a" + args[1] + " is now " + "§2"+ st);
 
                         }
                         else{
@@ -545,7 +553,9 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
 
                         if(dc.editVisibility(uuid_string, args[1], false)){
 
-                            sender.sendMessage("§8[§6LocuCore§8] §a" + args[1] + " is now " + "§4"+ st1);
+                            status = dc.getIsPublic(uuid_string, args[1]);
+                            st = status ? "public" : "private";
+                            sender.sendMessage("§8[§6LocuCore§8] §a" + args[1] + " is now " + "§4"+ st);
 
                         }
                         else{
@@ -565,7 +575,7 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
 
                 if(args.length<4){
 
-                    sender.sendMessage("§8[§6LocuCore§8] §cIncorrect usage. /luc edit <location> name <name>");
+                    sender.sendMessage("§8[§6LocuCore§8] §cIncorrect usage. /luc edit <waypoint> name <name>");
                     return true;
 
                 }
@@ -600,18 +610,50 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
                 if(dc.editName(uuid_string, args[1], args[3])){
 
                     sender.sendMessage("§8[§6LocuCore§8] §e" + args[1] + "§a is now §6" + args[3]);
-                    return true;
 
                 }
                 else{
 
                     sender.sendMessage("§8[§6LocuCore§8] §cAn error occurred while editing name");
-                    return true;
 
                 }
+                return true;
 
             }
 
+        }
+        else if(args[0].equalsIgnoreCase("info")){
+
+            //luc info
+
+            if(args.length>1){
+
+                sender.sendMessage("§8[§6LocuCore§8] §cIncorrect usage. Type /luc help");
+
+            }
+            sender.sendMessage(Component.text()
+                    .append(Component.text("------LocuCore------\n", NamedTextColor.GOLD))
+                    .append(Component.empty())
+                    .append(Component.text("\nVersion: ", NamedTextColor.GOLD))
+                    .append(Component.text(plugin.getPluginMeta().getVersion() + "\n", NamedTextColor.GREEN))
+                    .append(Component.text("\nAuthor: ", NamedTextColor.GOLD))
+                    .append(Component.text("Tuberoh\n", NamedTextColor.GREEN)
+                    .clickEvent(ClickEvent.openUrl("https://github.com/Tuberoh"))
+                    .decorate(TextDecoration.UNDERLINED))
+                    .append(Component.empty())
+                    .append(Component.text("\nLicense: ", NamedTextColor.GOLD))
+                    .append(Component.text("Apache 2.0\n", NamedTextColor.GREEN))
+                    .append(Component.empty())
+                    .append(Component.text("\n[Source Code] ", NamedTextColor.LIGHT_PURPLE)
+                            .clickEvent(ClickEvent.openUrl("https://github.com/Tuberoh/LocuCore")))
+                    .append(Component.text("[Issue] ", NamedTextColor.RED)
+                            .clickEvent(ClickEvent.openUrl("https://github.com/Tuberoh/LocuCore/issues")))
+                    .append(Component.text("[Wiki]\n", NamedTextColor.YELLOW)
+                            .clickEvent(ClickEvent.openUrl("https://locucore.gitbook.io")))
+                    .append(Component.empty())
+                    .append(Component.text("\n---------------------", NamedTextColor.GOLD))
+                    .build()
+            );
         }
 
         return true;
@@ -650,6 +692,7 @@ public class LocuCommand implements CommandExecutor, TabCompleter {
             }
             completions.add("menu");
             completions.add("help");
+            completions.add("info");
 
             return completions;
         }

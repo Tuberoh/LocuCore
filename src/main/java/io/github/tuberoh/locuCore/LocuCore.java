@@ -4,6 +4,8 @@ import io.github.tuberoh.locuCore.Commands.LocuCommand;
 import io.github.tuberoh.locuCore.Utilities.DataController;
 import io.github.tuberoh.locuCore.Utilities.MigrationSystem;
 import io.github.tuberoh.locuCore.listeners.MenuListener;
+import org.bstats.bukkit.Metrics;
+import org.bstats.charts.SimplePie;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
@@ -32,13 +34,19 @@ public final class LocuCore extends JavaPlugin {
 
         }
         final File LocuCorelist = new File(getDataFolder(), "data.yml");
-
         if(LocuCorelist.exists()){
 
             MigrationSystem ms = new MigrationSystem(this, LocuCorelist, dc);
             ms.startMigration();
 
         }
+
+        int plugin_id = 33874;
+        Metrics metrics = new Metrics(this, plugin_id);
+
+        metrics.addCustomChart(
+                new SimplePie("chart_id", () -> "My value")
+        );
 
         LocuCommand locuCommand = new LocuCommand(this, dc);
         getCommand("luc").setExecutor(locuCommand);

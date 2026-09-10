@@ -6,6 +6,7 @@ import io.github.tuberoh.locuCore.Objects.Waypoints;
 import io.github.tuberoh.locuCore.Utilities.DataController;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import java.util.UUID;
 
 public class DeleteMenuConf extends LocuMenu {
 
@@ -48,7 +49,30 @@ public class DeleteMenuConf extends LocuMenu {
 
             dc.deleteWaypoint(wp.getOwner_uuid(), locationName);
             String status = wp.getStatus() ? "public" : "private";
-            new WpMenu(plugin, 0, dc, status).open(player);
+            UUID uuid = player.getUniqueId();
+            String uuid_string = uuid.toString();
+
+            if(uuid_string.equals(wp.getOwner_uuid())){
+
+                if(wp.getStatus()){
+
+                    new WpMenu(plugin, 0, dc, "public_owned").open(player);
+
+                }
+                else{
+
+                    new WpMenu(plugin, 0, dc, "private_owned").open(player);
+
+                }
+
+            }
+            else{
+
+                new WpMenu(plugin, 0, dc, "public").open(player);
+
+            }
+
+
             player.sendMessage("§8[§6LocuCore§8] §c" + wp.getName() + "has been deleted successfully");
 
         });
